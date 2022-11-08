@@ -27,6 +27,8 @@ class ServiceApiGenerator(
         private val CLASS_NAME_MAP = ClassName("kotlin.collections", "HashMap")
         private val CLASS_NAME_SERVICE_PARAM = ClassName("com.konka.gzgnetwork.network.entity", "ServiceParam")
         private val CLASS_NAME_INTERCEPTOR = ClassName("okhttp3", "Interceptor")
+        private val CLASS_NAME_SERIALIZATION_RESPONSE_BODY_CONVERTER =
+            ClassName("com.konka.annotation.interfaces", "SerializationConverter")
         private val CLASS_NAME_BASE_RESPONSE_BODY_CONVERTER =
             ClassName("com.konka.gzgnetwork.network.converter", "BaseResponseBodyConverter")
         private val CLASS_NAME_GSON_RESPONSE_BODY_CONVERTER =
@@ -35,6 +37,8 @@ class ServiceApiGenerator(
         private val CLASS_NAME_RESPONSE_BODY = ClassName("okhttp3", "ResponseBody")
         private val CLASS_NAME_CONVERTER_OF_RESPONSE_BODY_AND_ANY =
             CLASS_NAME_CONVERTER.parameterizedBy(CLASS_NAME_RESPONSE_BODY, ANY)
+        private val CLASS_NAME_SERIALIZATION_CONVERTER_OF_RESPONSE_BODY_AND_ANY =
+            CLASS_NAME_SERIALIZATION_RESPONSE_BODY_CONVERTER.parameterizedBy(CLASS_NAME_RESPONSE_BODY, ANY)
     }
 
     override fun process(resolver: Resolver) {
@@ -154,7 +158,10 @@ class ServiceApiGenerator(
             .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
             .addParameter("className", String::class)
             .addParameter("type", Type::class)
-            .addStatement("val bodyConverter : Converter<ResponseBody, Any>? = when(className){")
+            .addStatement(
+                "val bodyConverter:%T? = when(className){",
+                CLASS_NAME_SERIALIZATION_CONVERTER_OF_RESPONSE_BODY_AND_ANY
+            )
 
         list.forEach { ksClassDeclaration ->
             val clsName = ksClassDeclaration.toClassName()
